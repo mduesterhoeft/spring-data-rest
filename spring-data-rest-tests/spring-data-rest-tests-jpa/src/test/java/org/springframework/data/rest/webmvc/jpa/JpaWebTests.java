@@ -233,6 +233,31 @@ public class JpaWebTests extends CommonWebTests {
 	}
 
 	/**
+	 * @see DATAREST-769
+	 */
+	@Test
+	public void createThenPatchWithTest() throws Exception {
+
+		Link peopleLink = client.discoverUnique("people");
+
+		MockHttpServletResponse bilbo = postAndGet(peopleLink, "{ \"firstName\" : \"Bilbo\", \"lastName\" : \"Baggins\" }",
+				MediaType.APPLICATION_JSON);
+
+		Link bilboLink = client.assertHasLinkWithRel("self", bilbo);
+
+		assertThat((String) JsonPath.read(bilbo.getContentAsString(), "$.firstName"), is("Bilbo"));
+		assertThat((String) JsonPath.read(bilbo.getContentAsString(), "$.lastName"), is("Baggins"));
+		String json = "[" +
+				"{\"op\": \"replace\", \"path\": \"/firstName\", \"value\": \"patched name\"},\n" +
+				"{\"op\": \"test\", \"path\": \"/firstName\", \"value\": \"Bilbo\"}" +
+				"]";
+		bilbo = patchAndGet(bilboLink, json,  MediaType.valueOf("application/json-patch+json"));
+
+		assertThat((String) JsonPath.read(bilbo.getContentAsString(), "$.firstName"), is("patched name"));
+	}
+
+
+	/**
 	 * @see DATAREST-150
 	 */
 	@Test

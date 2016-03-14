@@ -36,6 +36,7 @@ import com.github.fge.jackson.jsonpointer.JsonPointer;
 import com.github.fge.jsonpatch.JsonPatchOperation;
 import com.github.fge.jsonpatch.RemoveOperation;
 import com.github.fge.jsonpatch.ReplaceOperation;
+import com.github.fge.jsonpatch.TestOperation;
 
 /**
  * Component to apply JSON Patch and JSON Merge Patch payloads to existing domain objects. The implementation uses the
@@ -118,6 +119,8 @@ class JsonPatchHandler {
 				patchedNode = isCollectionElementReference(path) ? operation.apply(patchedNode)
 						: new ReplaceOperation(path, NullNode.getInstance()).apply(patchedNode);
 
+			} else if (operation instanceof TestOperation) {
+				operation.apply(existingAsNode);
 			} else {
 				patchedNode = operation.apply(patchedNode);
 			}
